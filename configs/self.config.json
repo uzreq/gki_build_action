@@ -5,7 +5,7 @@
   "rekernel_enable": "true",
   "ssg": "false",
   "lxc_enable": "false",
-  "stock_config": "true",
+  "stock_config": "false",
   "baseband_guard": "false",
   "key": "ak3-5.10_esk"
 }
