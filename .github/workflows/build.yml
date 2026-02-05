@@ -41,6 +41,7 @@ jobs:
       STOCK_CONFIG: ${{ matrix.CONFIG.stock_config }}
       LXC: ${{ matrix.CONFIG.lxc_enable }}
       SSG: ${{ matrix.CONFIG.ssg }}
+      MOUNTIFY: ${{ matrix.CONFIG.mountify}}
       BBG: ${{ matrix.CONFIG.baseband_guard }}
       BETTER_NET: ${{ matrix.CONFIG.better_net }}
       KEY: ${{ matrix.CONFIG.key }}
@@ -193,14 +194,19 @@ jobs:
           echo "CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
-          #添加对 Mountify (backslashxx/mountify) 模块的支持
-          echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
-          # 开启O2编译优化配置
-          echo "CONFIG_CC_OPTIMIZE_FOR_PERFORMANCE=y" >> ./common/arch/arm64/configs/gki_defconfig
-          #禁用 defconfig 检查
-          sed -i 's/check_defconfig//' ./common/build.config.gki
-          
+
+      - name: 支持mountify/hybrid的tmpfs模式
+        run: |
+          cd kernel_workspace
+          if [[ "${{ env.MOUNTIFY }}" == "true" ]]; then
+            #添加对 Mountify (backslashxx/mountify) 模块的支持
+            echo "CONFIG_TMPFS_XATTR=y" >> ./common/arch/arm64/configs/gki_defconfig
+            echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./common/arch/arm64/configs/gki_defconfig
+          fi
+
+      - name: 杂项设置
+        run: cd kernel_workspace && sed -i 's/check_defconfig//' ./common/build.config.gki
+
       - name: 启用网络功能增强优化配置
         run: |
           cd kernel_workspace
@@ -370,6 +376,7 @@ jobs:
           STOCK_CONFIG: ${{ env.STOCK_CONFIG }}
           LXC: ${{ env.LXC }}
           BBG: ${{ env.BBG }}
+          MOUNTIFY: ${{ env.MOUNTIFY }}
           BETTER_NET: ${{ env.BETTER_NET }}
         run: |
           if [ -z ${{ secrets.BOT_TOKEN }} ]; then

@@ -13,6 +13,7 @@ REKERNEL = os.environ.get("REKERNEL")
 BBG = os.environ.get("BBG")
 LXC = os.environ.get("LXC")
 SSG = os.environ.get("SSG")
+MOUNTIFY = os.environ.get("MOUNTIFY")
 STOCK_CONFIG = os.environ.get("STOCK_CONFIG")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -28,7 +29,7 @@ KsuVar: ReSukiSU
 KsuVersion: {ksuver}
 BBG: {bbg}
 Re:Kernel: {rekernel}
-Mountify support: true
+Mountify support: {mountify}
 lxc/docker support {lxc}
 SSG speed controller: {ssg}
 better net support: {better_net}
@@ -45,6 +46,7 @@ def get_caption():
         ssg=SSG,
         ksuver=get_ksu_versions(),
         stock=STOCK_CONFIG,
+        mountify=MOUNTIFY,
         rekernel=REKERNEL,
         lxc=LXC,
         bbg=BBG,
