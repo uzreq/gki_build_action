@@ -59,12 +59,13 @@ jobs:
             python-is-python3 bc libssl-dev libelf-dev \
             bc aria2 zip unzip ccache binutils-aarch64-linux-gnu
 
-      - name: 准备 ccache 目录变量
+      - name: 配置ccache目录
         run: |
-          CCACHE_DIR="$HOME/.ccache_${{ env.KERNEL_VERSION }}"
-          mkdir -p "$CCACHE_DIR"
-          echo "CCACHE_DIR=$CCACHE_DIR" >> $GITHUB_ENV
+          echo "CCACHE_DIR=$HOME/.ccache_${{ env.KERNEL_VERSION }}" >> $GITHUB_ENV
           echo "CCACHE_MAXSIZE=3G" >> $GITHUB_ENV
+          echo "当前磁盘空间："
+          df -h
+          echo "当前构建内核版本：${{ env.KERNEL_VERSION }}"
 
       - name: 载入当前版本内核的 ccache缓存
         uses: actions/cache@v4
