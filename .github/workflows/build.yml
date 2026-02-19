@@ -73,7 +73,7 @@ jobs:
           mkdir -p kernel_workspace
           cd kernel_workspace
           echo "正在克隆源码仓库..."
-          aria2c -s16 -x16 -k1M https://github.com/Tools-cx-app/android12-5.10-gki/archive/refs/heads/main.zip -o common.zip && 
+          aria2c -s16 -x16 -k1M https://github.com/ztc1997/android_gki_kernel_5.10_common/archive/refs/heads/android12-5.10-2025-12.zip -o common.zip && 
           unzip -q common.zip && 
           mv "android12-5.10-gki-main" common &&
           rm -rf common.zip &
