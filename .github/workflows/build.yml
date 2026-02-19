@@ -81,10 +81,10 @@ jobs:
 
 
 
-          echo "正在克隆llvm-Clang21工具链..." &&
-          mkdir -p clang21 &&
-          aria2c -s16 -x16 -k1M https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/6f88d37dd82ba741ca279539d44bb7da27ab1844/clang-r563880.tar.gz -o clang.tar.gz &&
-          tar -xf clang.tar.gz -C clang21 &&
+          echo "正在克隆llvm-Clang22工具链..." &&
+          mkdir -p clang22 &&
+          aria2c -s16 -x16 -k1M https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-main-llvm-toolchain-source/clang-r584948.tar.gz -o clang.tar.gz &&
+          tar -xf clang.tar.gz -C clang &&
           
           echo "正在克隆构建工具..." &&
           aria2c -s16 -x16 -k1M https://github.com/cctv18/oneplus_sm8650_toolchain/releases/download/LLVM-Clang20-r547379/build-tools.zip -o build-tools.zip &&
@@ -92,7 +92,7 @@ jobs:
           rm -rf build-tools.zip &
           
           wait
-          echo "所有源码及llvm-Clang21工具链初始化完成！"
+          echo "所有源码及llvm-Clang22工具链初始化完成！"
 #          echo "正在去除 ABI 保护 & 去除 dirty 后缀..."
 #rm common/android/abi_gki_protected_exports_* || true
 #          for f in common/scripts/setlocalversion; do
@@ -295,9 +295,9 @@ jobs:
         run: |
           WORKDIR="$(pwd)"
           export PATH="/usr/lib/ccache:$PATH"
-          export PATH="$WORKDIR/kernel_workspace/clang21/bin:$PATH"
+          export PATH="$WORKDIR/kernel_workspace/clang/bin:$PATH"
           export PATH="$WORKDIR/kernel_workspace/build-tools/bin:$PATH"
-          CLANG_DIR="$WORKDIR/kernel_workspace/clang21/bin"
+          CLANG_DIR="$WORKDIR/kernel_workspace/clang/bin"
           CLANG_VERSION="$($CLANG_DIR/clang --version | head -n 1)"
           LLD_VERSION="$($CLANG_DIR/ld.lld --version | head -n 1)"
           echo "编译器信息:"
