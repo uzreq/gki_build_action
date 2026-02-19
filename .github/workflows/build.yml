@@ -8,6 +8,12 @@ env:
 
 on:
   workflow_dispatch:
+    inputs:
+      ccache_update:
+        description: '更新ccache缓存(将本次编译生成的ccache缓存覆盖至仓库缓存，在更改编译配置、源码或需要刷新缓存时开启)'
+        required: true
+        type: boolean
+        default: 'false'
 
 jobs:
   read:
@@ -46,6 +52,9 @@ jobs:
       BETTER_NET: ${{ matrix.CONFIG.better_net }}
       KEY: ${{ matrix.CONFIG.key }}
       DEBUG: ${{ matrix.CONFIG.debug }}
+    permissions:
+      actions: write
+      contents: read
     steps:
       - name: 安装配置环境依赖
         run: |
@@ -72,10 +81,22 @@ jobs:
         id: ccache-restore
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }}-${{ github.sha }}
+          key: ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }}
           restore-keys: |
             ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }}-
 
+
+      - name: 清除旧 ccache 缓存
+        if: inputs.ccache_update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "正在清除仓库中的旧 ccache 缓存..."
+          if gh cache delete ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }} -R ${{ github.repository }}; then
+            echo "成功删除旧的 ccache 缓存！"
+          else
+            echo "旧缓存不存在或已被清理！"
+          fi
 
       - name: 初始化并配置 ccache
         run: |
@@ -351,8 +372,14 @@ jobs:
           ccache -s
           echo "编译后空间:"
           df -h
+
+      - name: 保存新的 ccache 缓存
+        if: inputs.ccache_update || steps.ccache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }}
          
-          
       - name: 克隆 AnyKernel3 并打包
         run: |
           cd kernel_workspace
