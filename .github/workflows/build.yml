@@ -82,7 +82,7 @@ jobs:
 
 
           echo "正在克隆llvm-Clang22工具链..." &&
-          mkdir -p clang22 &&
+          mkdir -p clang &&
           aria2c -s16 -x16 -k1M https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-main-llvm-toolchain-source/clang-r584948.tar.gz -o clang.tar.gz &&
           tar -xf clang.tar.gz -C clang &&
           
