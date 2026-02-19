@@ -114,7 +114,7 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }}
           restore-keys: |
-            ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }}-
+            ccache-esk-${{ env.KERNEL_VERSION }}-${{ env.KEY }}
 
 
       - name: 清除旧 ccache 缓存
