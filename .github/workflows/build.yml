@@ -56,18 +56,7 @@ jobs:
       actions: write
       contents: read
     steps:
-      - name: Maximize Build Space
-        uses: AdityaGarg8/remove-unwanted-software@v5
-        with:
-          remove-dotnet: 'true'          # Frees ~2 GB
-          remove-android: 'true'         # Frees ~9 GB
-          remove-haskell: 'true'         # Frees ~5.2 GB
-          remove-codeql: 'true'          # Frees ~5.4 GB
-          remove-docker-images: 'true'   # Frees ~3.2 GB
-          remove-large-packages: 'true'  # Frees ~3.1 GB
-          remove-cached-tools: 'false'   # Avoid unless confirmed safe
-          verbose: 'true'                # Enable detailed logging
-          
+
       - name: 安装配置环境依赖
         run: |
           sudo apt-mark hold firefox
@@ -113,7 +102,7 @@ jobs:
       - name: 配置ccache目录
         run: |
           echo "CCACHE_DIR=$HOME/.ccache_${{ env.KERNEL_VERSION }}" >> $GITHUB_ENV
-          echo "CCACHE_MAXSIZE=12G" >> $GITHUB_ENV
+          echo "CCACHE_MAXSIZE=20G" >> $GITHUB_ENV
           echo "当前磁盘空间："
           df -h
           echo "当前构建内核版本：${{ env.KERNEL_VERSION }}"
@@ -320,7 +309,7 @@ jobs:
           export CCACHE_NOHASHDIR="true"
           export CCACHE_HARDLINK="true"
           export CCACHE_DIR="${{ env.CCACHE_DIR }}"
-          export CCACHE_MAXSIZE="12G"
+          export CCACHE_MAXSIZE="20G"
           echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$CCACHE_DIR/ccache.conf"
 
           cd kernel_workspace/common
