@@ -19,11 +19,6 @@ on:
         required: true
         type: boolean
         default: false
-      rekernel:
-        description: '是否启用Re-Kernel支持(与Freezer/NoActive等软件配合, 提升应用冻结能力)'
-        required: true
-        type: boolean
-        default: true
       better_net:
         description: '是否开启网络功能拓展配置(用于为ipset及需要iptables等高级网络功能内核支持的程序提供支持)'
         required: true
@@ -188,14 +183,6 @@ jobs:
           echo "下载相关文件"
           curl -fLSs "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/patches/stock_config.patch" -o stock_config.patch
           patch -p1 --fuzz=3 < stock_config.patch
-
-      - name: 添加Re:Kernel
-        if: inputs.rekernel
-        run: |
-          source /tmp/config.sh
-          config --enable CONFIG_REKERNEL
-          config --enable CONFIG_REKERNEL_NETWORK
-          
 
       - name: Config SSG I/O scheduler
         if: ${{ !inputs.ssg }}
@@ -413,7 +400,6 @@ jobs:
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SSG: ${{ inputs.ssg }}
-          REKERNEL: ${{ inputs.rekernel }}
           STOCK_CONFIG: ${{ inputs.stock_config }}
           LXC: ${{ inputs.lxc }}
           BBG: ${{ inputs.baseband_guard }}

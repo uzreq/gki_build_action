@@ -9,7 +9,6 @@ API_ID = 611335
 API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
 
 BETTER_NET = os.environ.get("BETTER_NET")
-REKERNEL = os.environ.get("REKERNEL")
 BBG = os.environ.get("BBG")
 LXC = os.environ.get("LXC")
 SSG = os.environ.get("SSG")
@@ -28,7 +27,6 @@ stock: {stock}
 KsuVar: ReSukiSU
 KsuVersion: {ksuver}
 BBG: {bbg}
-Re:Kernel: {rekernel}
 Mountify support: {mountify}
 lxc/docker support {lxc}
 SSG speed controller: {ssg}
@@ -47,7 +45,6 @@ def get_caption():
         ksuver=get_ksu_versions(),
         stock=STOCK_CONFIG,
         mountify=MOUNTIFY,
-        rekernel=REKERNEL,
         lxc=LXC,
         bbg=BBG,
         better_net=BETTER_NET,
@@ -55,13 +52,14 @@ def get_caption():
     )
     return msg
 
+
 def get_kernel_versions():
-    version=""
-    patchlevel=""
-    sublevel=""
+    version = ""
+    patchlevel = ""
+    sublevel = ""
 
     try:
-        with open("./kernel_workspace/common/Makefile",'r') as file:
+        with open("./kernel_workspace/common/Makefile", 'r') as file:
             for line in file:
                 if line.startswith("VERSION"):
                     version = line.split('=')[1].strip()
@@ -69,7 +67,7 @@ def get_kernel_versions():
                     patchlevel = line.split('=')[1].strip()
                 elif line.startswith("SUBLEVEL"):
                     sublevel = line.split('=')[1].strip()
-                elif line.startswith("#"): # skip comments
+                elif line.startswith("#"):  # skip comments
                     continue
                 else:
                     break
@@ -77,12 +75,15 @@ def get_kernel_versions():
         raise
     return f"{version}.{patchlevel}.{sublevel}"
 
+
 def get_ksu_versions():
-    current_work=os.getcwd()
+    current_work = os.getcwd()
     os.chdir(current_work+"/kernel_workspace/common/KernelSU")
-    ksuver=os.popen("echo $(git describe --tags $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)@$(git branch --show-current)").read().strip()
+    ksuver = os.popen(
+        "echo $(git describe --tags $(git rev-list --tags --max-count=1))-$(git rev-parse --short HEAD)@$(git branch --show-current)").read().strip()
     os.chdir(current_work)
     return ksuver
+
 
 async def send_telegram_message(file_path: str):
     async with TelegramClient(StringSession(BOT_CI_SESSION), api_id=API_ID, api_hash=API_HASH) as client:
