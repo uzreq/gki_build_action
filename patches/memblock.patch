@@ -1,0 +1,43 @@
+From 2a1c4f3fa6541b5b8210b8e57b90652d036845fa Mon Sep 17 00:00:00 2001
+From: cctv18 <85936817+cctv18@users.noreply.github.com>
+Date: Mon, 4 May 2026 02:58:10 +0800
+Subject: [PATCH] mm/memblock: fix section mismatch between memblock_free_late
+ and __memblock_free_late
+
+__memblock_free_late() is defined as __init in mm/memblock.c, but its
+header declaration and the memblock_free_late() wrapper in
+include/linux/memblock.h were missing __init.
+
+With clang20 and non-LTO builds, memblock_free_late() may be emitted as
+an out-of-line .text function, which then references .init.text
+(__memblock_free_late), triggering modpost section mismatch errors.
+
+Annotate both the declaration of __memblock_free_late() and the
+memblock_free_late() wrapper with __init so section placement remains
+consistent regardless of inlining/LTO behavior.
+---
+ include/linux/memblock.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/include/linux/memblock.h b/include/linux/memblock.h
+index 3d2351b43d3b..e08e09647bff 100644
+--- a/include/linux/memblock.h
++++ b/include/linux/memblock.h
+@@ -132,7 +132,7 @@ void __next_mem_range_rev(u64 *idx, int nid, enum memblock_flags flags,
+ 			  struct memblock_type *type_b, phys_addr_t *out_start,
+ 			  phys_addr_t *out_end, int *out_nid);
+ 
+-void __memblock_free_late(phys_addr_t base, phys_addr_t size);
++void __init __memblock_free_late(phys_addr_t base, phys_addr_t size);
+ 
+ #ifdef CONFIG_HAVE_MEMBLOCK_PHYS_MAP
+ static inline void __next_physmem_range(u64 *idx, struct memblock_type *type,
+@@ -452,7 +452,7 @@ static inline void memblock_free_early_nid(phys_addr_t base,
+ 	memblock_free(base, size);
+ }
+ 
+-static inline void memblock_free_late(phys_addr_t base, phys_addr_t size)
++static inline __init void memblock_free_late(phys_addr_t base, phys_addr_t size)
+ {
+ 	__memblock_free_late(base, size);
+ }

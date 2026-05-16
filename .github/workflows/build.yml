@@ -91,7 +91,7 @@ jobs:
           rm -f ./ccache &
           
           echo "正在克隆源码仓库..." &&
-          aria2c -s16 -x16 -k1M https://github.com/Tools-cx-app/android12-5.10-gki/archive/refs/heads/main.zip -o common.zip && 
+          aria2c -s16 -x16 -k1M https://github.com/ESK-Project/android12-5.10-gki/archive/refs/heads/main.zip -o common.zip && 
           unzip -q common.zip && 
           mv "android12-5.10-gki-main" common &&
           rm -rf common.zip &
@@ -227,7 +227,11 @@ jobs:
           config --enable CONFIG_TMPFS_POSIX_ACL
 
       - name: 杂项设置
-        run: cd kernel_workspace && sed -i 's/check_defconfig//' ./common/build.config.gki
+        run: |
+          cd kernel_workspace
+          sed -i 's/check_defconfig//' ./common/build.config.gki
+          curl -fLSs "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/patches/memblock.patch" -o memblock.patch
+          patch -p1 --fuzz=3 < memblock.patch
 
       - name: 关闭LTO
         if: inputs.lto_none
