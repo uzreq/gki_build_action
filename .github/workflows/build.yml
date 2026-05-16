@@ -208,8 +208,8 @@ jobs:
 
       - name: 杂项设置
         run: |
-          cd kernel_workspace
-          sed -i 's/check_defconfig//' ./common/build.config.gki
+          cd kernel_workspace/common
+          sed -i 's/check_defconfig//' ./build.config.gki
           curl -fLSs "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/patches/memblock.patch" -o memblock.patch
           patch -p1 --fuzz=3 < memblock.patch
 
@@ -265,6 +265,7 @@ jobs:
         if: inputs.droidspaces != 'off'
         run: |
           source /tmp/config.sh
+          cd kernel_workspace/common
           git clone --depth 1 https://github.com/ravindu644/Droidspaces-OSS.git droidspaces
 
           SLOT="${{ inputs.droidspaces }}"
@@ -278,6 +279,7 @@ jobs:
           patch -p1 --forward < "droidspaces/Documentation/resources/kernel-patches/GKI/below-kernel-6.12/002.5.10_or_lower_use_android_abi_padding_for_posix_mqueue.patch"
           echo "添加 Droidspaces 内核配置..."
 
+          cd ../../
           # 必要配置
           config --enable CONFIG_SYSVIPC
           config --enable CONFIG_POSIX_MQUEUE
