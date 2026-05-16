@@ -9,11 +9,6 @@ env:
 on:
   workflow_dispatch:
     inputs:
-      kernelsu:
-        description: '是否包含kernelsu(builtin)'
-        required: true
-        type: boolean
-        default: true
       stock_config:
         description: '是否伪装defconfig为原厂defconfig'
         required: true
@@ -208,17 +203,6 @@ jobs:
             patch -p1 --forward --fuzz=3 < lxc.patch
           fi
           
-      - name: 添加 KSU 配置项
-        if: inputs.kernelsu
-        run: |
-          source /tmp/config.sh
-          config --enable CONFIG_KSU
-          echo "正在开启manual钩子..."
-          config --enable CONFIG_KSU_MANUAL_HOOK
-          config --enable CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
-          config --enable CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
-          config --enable CONFIG_KSU_MANUAL_HOOK_AUTO_INPUT_HOOK
-
       - name: 支持mountify/hybrid的tmpfs模式
         if: inputs.tmpfs
         run: |
