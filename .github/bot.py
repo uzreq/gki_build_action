@@ -26,7 +26,6 @@ stock: {stock}
 BBG: {bbg}
 Mountify support: {mountify}
 lxc/docker support {lxc}
-SSG speed controller: {ssg}
 better net support: {better_net}
 ```
 Please follow @@esk_gki_build !
@@ -38,7 +37,6 @@ Please follow @@esk_gki_build !
 def get_caption():
     msg = MSG_TEMPLATE.format(
         kernelversion=get_kernel_versions(),
-        ssg=SSG,
         stock=STOCK_CONFIG,
         mountify=MOUNTIFY,
         lxc=LXC,
