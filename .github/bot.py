@@ -23,7 +23,7 @@ RUN_URL = os.environ.get("RUN_URL")
 BOT_CI_SESSION = os.environ.get("BOT_CI_SESSION")
 MSG_TEMPLATE = """
 **New Build Published!**
-*LTO: {lto}*
+**LTO: {lto}**
 ```Kernel Info
 kernelver: {kernelversion}
 stock: {stock}
