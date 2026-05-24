@@ -392,6 +392,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           STOCK_CONFIG: ${{ inputs.stock_config }}
           LXC: ${{ inputs.lxc }}
+          LTO: ${{ inputs.lto }}
           DROIDSPACES: ${{ inputs.droidspaces }}
           BBG: ${{ inputs.baseband_guard }}
           MOUNTIFY: ${{ inputs.tmpfs }}
