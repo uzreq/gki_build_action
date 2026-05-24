@@ -39,6 +39,11 @@ on:
         required: true
         type: boolean
         default: true
+      unshare:
+        description: '开启完整的unshare 支持'
+        required: true
+        type: boolean
+        default: true
       lto:
         description: 'LTO级别'
         required: true
@@ -202,6 +207,15 @@ jobs:
             }'  lxc.patch
             patch -p1 --forward --fuzz=3 < lxc.patch
           fi
+
+      - name: 补全unshare支持
+        if: inputs.unshare
+        run: |
+          source /tmp/config.sh
+          config --enable CONFIG_IPC_NS
+          config --enable CONFIG_PID_NS
+          config --enable CONFIG_UTS_NS
+          config --enable CONFIG_CGROUP_NS
           
       - name: 支持mountify/hybrid的tmpfs模式
         if: inputs.tmpfs
@@ -391,6 +405,7 @@ jobs:
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           STOCK_CONFIG: ${{ inputs.stock_config }}
+          UNSHARE: ${{ inputs.unshare }}
           LXC: ${{ inputs.lxc }}
           LTO: ${{ inputs.lto }}
           DROIDSPACES: ${{ inputs.droidspaces }}

@@ -15,6 +15,7 @@ MOUNTIFY = os.environ.get("MOUNTIFY")
 STOCK_CONFIG = os.environ.get("STOCK_CONFIG")
 DROIDSPACES = os.environ.get("DROIDSPACES")
 LTO = os.environ.get("LTO")
+UNSHARE = os.environ.get("UNSHARE")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = int(os.environ.get("CHAT_ID"))
@@ -27,6 +28,7 @@ MSG_TEMPLATE = """
 kernelver: {kernelversion}
 stock: {stock}
 BBG: {bbg}
+unshare: {unshare}
 Mountify support: {mountify}
 lxc/docker support {lxc}
 droidspaces: {droidspaces}
@@ -43,6 +45,7 @@ def get_caption():
         lto=LTO,
         kernelversion=get_kernel_versions(),
         stock=STOCK_CONFIG,
+        unshare=UNSHARE,
         mountify=MOUNTIFY,
         lxc=LXC,
         droidspaces=DROIDSPACES,
