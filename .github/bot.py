@@ -16,6 +16,7 @@ STOCK_CONFIG = os.environ.get("STOCK_CONFIG")
 DROIDSPACES = os.environ.get("DROIDSPACES")
 LTO = os.environ.get("LTO")
 UNSHARE = os.environ.get("UNSHARE")
+NTSYNC = os.environ.get("NTSYNC")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = int(os.environ.get("CHAT_ID"))
@@ -32,6 +33,7 @@ unshare: {unshare}
 Mountify support: {mountify}
 lxc/docker support {lxc}
 droidspaces: {droidspaces}
+ntsync: {ntsync}
 better net support: {better_net}
 ```
 Please follow @esk_gki_build !
@@ -49,6 +51,7 @@ def get_caption():
         mountify=MOUNTIFY,
         lxc=LXC,
         droidspaces=DROIDSPACES,
+        ntsync=NTSYNC,
         bbg=BBG,
         better_net=BETTER_NET,
         run_url=RUN_URL,
