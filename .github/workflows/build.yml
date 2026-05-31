@@ -322,6 +322,9 @@ jobs:
           config --enable CONFIG_IPC_NS
           config --enable CONFIG_PID_NS
           config --enable CONFIG_DEVTMPFS
+          config --enable CONFIG_NETFILTER_XT_TARGET_REJECT
+          config --enable CONFIG_NETFILTER_XT_TARGET_LOG
+          config --enable CONFIG_NETFILTER_XT_MATCH_RECENT
 
           echo "Droidspaces 集成完成"
 
