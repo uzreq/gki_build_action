@@ -226,33 +226,13 @@ jobs:
           curl -fLSs "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/patches/5.10-scope-min-manual-hook.patch" -o kernelsu.patch
 
           patch -p1 --forward --fuzz=3 < kernelsu.patch
-          
-          cd ../../
-          source /tmp/config.sh
-          config --enable CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
-          config --enable CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
-          config --enable CONFIG_KSU_MANUAL_HOOK
-          config --enable CONFIG_KSU
 
       - name: 补全unshare支持
         if: inputs.unshare
         run: |
-          source /tmp/config.sh
-          config --enable CONFIG_IPC_NS
-          config --enable CONFIG_PID_NS
-          config --enable CONFIG_UTS_NS
-          config --enable CONFIG_CGROUP_NS
-          config --enable CONFIG_SYSVIPC
           cd kernel_workspace/common
           curl -fLSs "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/patches/fix-sysvipc-kabi.patch" -o fix-sysvipc-kabi.patch
           patch -p1 --forward --fuzz=3 < fix-sysvipc-kabi.patch
-          
-      - name: 支持mountify/hybrid的tmpfs模式
-        if: inputs.tmpfs
-        run: |
-          source /tmp/config.sh
-          config --enable CONFIG_TMPFS_XATTR
-          config --enable CONFIG_TMPFS_POSIX_ACL
 
       - name: 杂项设置
         run: |
@@ -283,34 +263,6 @@ jobs:
       - name: 启用网络功能增强优化配置
         if: inputs.better_net
         run: |
-          source /tmp/config.sh
-          #启用  BPF 流解析器,实现高性能网络流量处理,增强网络监控和分析能力
-          config --enable CONFIG_BPF_STREAM_PARSER
-          #开启增强 Netfilter 防火墙扩展模块,支持基于地址类型的匹配规则,启用 IP 集合支持,提高防火墙规则灵活性,支持更复杂的流量过滤策略
-          config --enable CONFIG_NETFILTER_XT_MATCH_ADDRTYPE
-          config --enable CONFIG_NETFILTER_XT_SET
-          #启用 IP 集框架及其多种数据结构实现,提供高效的大规模 IP 地址管理,提高防火墙规则处理效率,减少内存占用
-          config --enable CONFIG_IP_SET
-          config --set-val CONFIG_IP_SET_MAX 65534
-          config --enable CONFIG_IP_SET_BITMAP_IP
-          config --enable CONFIG_IP_SET_BITMAP_IPMAC
-          config --enable CONFIG_IP_SET_BITMAP_PORT
-          config --enable CONFIG_IP_SET_HASH_IP
-          config --enable CONFIG_IP_SET_HASH_IPMARK
-          config --enable CONFIG_IP_SET_HASH_IPPORT
-          config --enable CONFIG_IP_SET_HASH_IPPORTIP
-          config --enable CONFIG_IP_SET_HASH_IPPORTNET
-          config --enable CONFIG_IP_SET_HASH_IPMAC
-          config --enable CONFIG_IP_SET_HASH_MAC
-          config --enable CONFIG_IP_SET_HASH_NETPORTNET
-          config --enable CONFIG_IP_SET_HASH_NET
-          config --enable CONFIG_IP_SET_HASH_NETNET
-          config --enable CONFIG_IP_SET_HASH_NETPORT
-          config --enable CONFIG_IP_SET_HASH_NETIFACE
-          config --enable CONFIG_IP_SET_LIST_SET
-          #启用 IPv6 网络地址转换
-          config --enable CONFIG_IP6_NF_NAT
-          config --enable CONFIG_IP6_NF_TARGET_MASQUERADE
           #由于部分机型的vintf兼容性检测规则，在开启CONFIG_IP6_NF_NAT后开机会出现"您的设备内部出现了问题。请联系您的设备制造商了解详情。"的提示，故添加一个配置修复补丁，在编译内核时隐藏CONFIG_IP6_NF_NAT=y但不影响对应功能编译
           if [[ "${{ inputs.STOCK_CONFIG }}" != "true" ]]; then
             cd kernel_workspace/common
@@ -321,7 +273,6 @@ jobs:
       - name: 集成 Droidspaces 支持
         if: inputs.droidspaces != 'off'
         run: |
-          source /tmp/config.sh
           cd kernel_workspace/common
           git clone --depth 1 https://github.com/ravindu644/Droidspaces-OSS.git droidspaces
 
@@ -336,36 +287,22 @@ jobs:
           patch -p1 --forward < "droidspaces/Documentation/resources/kernel-patches/GKI/below-kernel-6.12/002.5.10_or_lower_use_android_abi_padding_for_posix_mqueue.patch"
           echo "添加 Droidspaces 内核配置..."
 
-          cd ../../
-          # 必要配置
-          config --enable CONFIG_SYSVIPC
-          config --enable CONFIG_POSIX_MQUEUE
-          config --enable CONFIG_IPC_NS
-          config --enable CONFIG_PID_NS
-          config --enable CONFIG_DEVTMPFS
-
           echo "Droidspaces 集成完成"
 
       - name: 集成ntsync支持
         if: inputs.droidspaces && inputs.ntsync
         run: |
-          source /tmp/config.sh
           cd kernel_workspace/common
 
           echo "应用 ntsync 补丁"
           curl -fLSs "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/patches/ntsync.patch" -o ntsync.patch
           patch -p1 --forward < ntsync.patch
 
-          cd ../../
-
-          config --enable CONFIG_NTSYNC
 
       - name: 启用内核级基带保护
         if: inputs.baseband_guard
         run: |
           echo "正在启用启用内核级基带保护支持…"
-          source /tmp/config.sh
-          config --enable CONFIG_BBG
           cd kernel_workspace/common
           curl -LSs https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash -s
           sed -i '/^config LSM$/,/^help$/{ /^[[:space:]]*default/ { /baseband_guard/! s/lockdown/lockdown,baseband_guard/ } }' security/Kconfig
@@ -378,6 +315,75 @@ jobs:
           for f in ./common/scripts/setlocalversion; do
             sed -i "\$s|echo \"\\\$res\"|echo \"-${{ env.KERNEL_NAME }}\"|" "$f"
           done
+
+      - name: 补全 defconfig
+        run: |
+          source /tmp/config.sh
+
+          if [ "${{ github.event.inputs.kernelsu }}" == "true" ]; then
+            config --enable CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
+            config --enable CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
+            config --enable CONFIG_KSU_MANUAL_HOOK
+            config --enable CONFIG_KSU
+          fi
+
+          if [ "${{ github.event.inputs.baseband_guard }}" == "true" ]; then
+            config --enable CONFIG_BBG
+          fi
+          
+          if [ "${{ github.event.inputs.droidspaces }}" == "true" ]; then 
+            if [ "${{ github.event.inputs.ntsync }}" == "true" ]; then
+              config --enable CONFIG_NTSYNC
+            fi
+
+            config --enable CONFIG_SYSVIPC
+            config --enable CONFIG_POSIX_MQUEUE
+            config --enable CONFIG_IPC_NS
+            config --enable CONFIG_PID_NS
+            config --enable CONFIG_DEVTMPFS
+          fi
+
+          if [ "${{ github.event.inputs.better_net }}" == "true" ]; then
+            config --enable CONFIG_BPF_STREAM_PARSER
+            #开启增强 Netfilter 防火墙扩展模块,支持基于地址类型的匹配规则,启用 IP 集合支持,提高防火墙规则灵活性,支持更复杂的流量过滤策略
+            config --enable CONFIG_NETFILTER_XT_MATCH_ADDRTYPE
+            config --enable CONFIG_NETFILTER_XT_SET
+            #启用 IP 集框架及其多种数据结构实现,提供高效的大规模 IP 地址管理,提高防火墙规则处理效率,减少内存占用
+            config --enable CONFIG_IP_SET
+            config --set-val CONFIG_IP_SET_MAX 65534
+            config --enable CONFIG_IP_SET_BITMAP_IP
+            config --enable CONFIG_IP_SET_BITMAP_IPMAC
+            config --enable CONFIG_IP_SET_BITMAP_PORT
+            config --enable CONFIG_IP_SET_HASH_IP
+            config --enable CONFIG_IP_SET_HASH_IPMARK
+            config --enable CONFIG_IP_SET_HASH_IPPORT
+            config --enable CONFIG_IP_SET_HASH_IPPORTIP
+            config --enable CONFIG_IP_SET_HASH_IPPORTNET
+            config --enable CONFIG_IP_SET_HASH_IPMAC
+            config --enable CONFIG_IP_SET_HASH_MAC
+            config --enable CONFIG_IP_SET_HASH_NETPORTNET
+            config --enable CONFIG_IP_SET_HASH_NET
+            config --enable CONFIG_IP_SET_HASH_NETNET
+            config --enable CONFIG_IP_SET_HASH_NETPORT
+            config --enable CONFIG_IP_SET_HASH_NETIFACE
+            config --enable CONFIG_IP_SET_LIST_SET
+            #启用 IPv6 网络地址转换
+            config --enable CONFIG_IP6_NF_NAT
+            config --enable CONFIG_IP6_NF_TARGET_MASQUERADE
+          fi
+
+          if [ "${{ github.event.inputs.tmpfs }}" == "true" ]; then
+            config --enable CONFIG_TMPFS_XATTR
+            config --enable CONFIG_TMPFS_POSIX_ACL
+          fi
+
+          if [ "${{ github.event.inputs.unshare }}" == "true" ]; then
+            config --enable CONFIG_IPC_NS
+            config --enable CONFIG_PID_NS
+            config --enable CONFIG_UTS_NS
+            config --enable CONFIG_CGROUP_NS
+            config --enable CONFIG_SYSVIPC
+          fi
            
       - name: 构建内核
         run: |
