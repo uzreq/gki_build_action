@@ -455,6 +455,7 @@ jobs:
           BOT_CI_SESSION: ${{ secrets.BOT_CI_SESSION }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           STOCK_CONFIG: ${{ inputs.stock_config }}
+          RESUKISU: ${{ inputs.kernelsu }}
           UNSHARE: ${{ inputs.unshare }}
           LXC: ${{ inputs.lxc }}
           LTO: ${{ inputs.lto }}

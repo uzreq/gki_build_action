@@ -17,6 +17,7 @@ DROIDSPACES = os.environ.get("DROIDSPACES")
 LTO = os.environ.get("LTO")
 UNSHARE = os.environ.get("UNSHARE")
 NTSYNC = os.environ.get("NTSYNC")
+RESUKISU = os.environ.get("RESUKISU")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 CHAT_ID = int(os.environ.get("CHAT_ID"))
@@ -28,6 +29,7 @@ MSG_TEMPLATE = """
 ```Kernel Info
 kernelver: {kernelversion}
 stock: {stock}
+resukisu: {resukisu}
 BBG: {bbg}
 unshare: {unshare}
 Mountify support: {mountify}
@@ -48,6 +50,7 @@ def get_caption():
         kernelversion=get_kernel_versions(),
         stock=STOCK_CONFIG,
         unshare=UNSHARE,
+        resukisu=RESUKISU,
         mountify=MOUNTIFY,
         lxc=LXC,
         droidspaces=DROIDSPACES,
