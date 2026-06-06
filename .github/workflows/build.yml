@@ -331,7 +331,7 @@ jobs:
             config --enable CONFIG_BBG
           fi
           
-          if [ "${{ github.event.inputs.droidspaces }}" == "true" ]; then 
+          if [ "${{ github.event.inputs.droidspaces }}" != "off" ]; then 
             if [ "${{ github.event.inputs.ntsync }}" == "true" ]; then
               config --enable CONFIG_NTSYNC
             fi
