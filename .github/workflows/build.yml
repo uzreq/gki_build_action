@@ -39,6 +39,11 @@ on:
         required: true
         type: boolean
         default: false
+      kernelsu:
+        description: '是否开启内建kernelsu(resukisu)'
+        required: true
+        type: boolean
+        default: true
       baseband_guard:
         description: '是否开启内核级基带保护(阻止一切对非用户分区的写入，有效防止格机)'
         required: true
@@ -212,6 +217,22 @@ jobs:
             }'  lxc.patch
             patch -p1 --forward --fuzz=3 < lxc.patch
           fi
+
+      - name: 添加kernelsu
+        if: inputs.kernelsu
+        run: |
+          cd kernel_workspace/common
+          curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash
+          curl -fLSs "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/patches/5.10-scope-min-manual-hook.patch" -o kernelsu.patch
+
+          patch -p1 --forward --fuzz=3 < kernelsu.patch
+          
+          cd ../../
+          source /tmp/config.sh
+          config --enable CONFIG_KSU_MANUAL_HOOK_AUTO_INITRC_HOOK
+          config --enable CONFIG_KSU_MANUAL_HOOK_AUTO_SETUID_HOOK
+          config --enable CONFIG_KSU_MANUAL_HOOK
+          config --enable CONFIG_KSU
 
       - name: 补全unshare支持
         if: inputs.unshare
