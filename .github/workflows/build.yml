@@ -341,6 +341,16 @@ jobs:
             config --enable CONFIG_IPC_NS
             config --enable CONFIG_PID_NS
             config --enable CONFIG_DEVTMPFS
+            config --enable CONFIG_NETFILTER_XT_MATCH_ADDRTYPE
+            config --enable CONFIG_NETFILTER_XT_TARGET_REJECT
+            config --enable CONFIG_NETFILTER_XT_TARGET_LOG
+            config --enable CONFIG_NETFILTER_XT_MATCH_RECENT
+            config --enable CONFIG_IP_SET
+            config --enable CONFIG_IP_SET_HASH_IP
+            config --enable CONFIG_IP_SET_HASH_NET
+            config --enable CONFIG_NETFILTER_XT_SET
+            config --enable CONFIG_TMPFS_XATTR
+            config --enable CONFIG_TMPFS_POSIX_ACL
           fi
 
           if [ "${{ github.event.inputs.better_net }}" == "true" ]; then
