@@ -34,11 +34,6 @@ on:
         required: true
         type: boolean
         default: false
-      lxc:
-        description: '是否启用lxc支持(部分设备可能不开机)'
-        required: true
-        type: boolean
-        default: false
       kernelsu:
         description: '是否开启内建kernelsu(resukisu)'
         required: true
@@ -202,21 +197,6 @@ jobs:
           curl -fLSs "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/patches/stock_config.patch" -o stock_config.patch
           patch -p1 --fuzz=3 < stock_config.patch
 
-      - name: 添加lxc
-        if: inputs.lxc
-        run: |
-          cd kernel_workspace/common
-          echo "下载相关文件"
-          curl -fLSs "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/patches/lxc.patch" -o lxc.patch
-          echo "开始patch"
-          if [ -e "drivers/gpu/mediatek/mali-valhall/gpu/arm/midgard/context/mali_kbase_context.c" ]; then
-            patch -p1 --forward --fuzz=3 < lxc.patch
-          else
-            sed -i '/^diff --git.*mali_kbase_context\.c$/,/^diff --git/{
-              /^diff --git/!d
-            }'  lxc.patch
-            patch -p1 --forward --fuzz=3 < lxc.patch
-          fi
 
       - name: 添加kernelsu
         if: inputs.kernelsu
@@ -467,7 +447,6 @@ jobs:
           STOCK_CONFIG: ${{ inputs.stock_config }}
           RESUKISU: ${{ inputs.kernelsu }}
           UNSHARE: ${{ inputs.unshare }}
-          LXC: ${{ inputs.lxc }}
           LTO: ${{ inputs.lto }}
           DROIDSPACES: ${{ inputs.droidspaces }}
           NTSYNC: ${{ inputs.ntsync }}

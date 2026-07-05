@@ -10,7 +10,6 @@ API_HASH = "d524b414d21f4d37f08684c1df41ac9c"
 
 BETTER_NET = os.environ.get("BETTER_NET")
 BBG = os.environ.get("BBG")
-LXC = os.environ.get("LXC")
 MOUNTIFY = os.environ.get("MOUNTIFY")
 STOCK_CONFIG = os.environ.get("STOCK_CONFIG")
 DROIDSPACES = os.environ.get("DROIDSPACES")
@@ -33,7 +32,6 @@ resukisu: {resukisu}
 BBG: {bbg}
 unshare: {unshare}
 Mountify support: {mountify}
-lxc/docker support {lxc}
 droidspaces: {droidspaces}
 ntsync: {ntsync}
 better net support: {better_net}
@@ -52,7 +50,6 @@ def get_caption():
         unshare=UNSHARE,
         resukisu=RESUKISU,
         mountify=MOUNTIFY,
-        lxc=LXC,
         droidspaces=DROIDSPACES,
         ntsync=NTSYNC,
         bbg=BBG,
