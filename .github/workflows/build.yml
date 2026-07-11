@@ -4,7 +4,7 @@ env:
   TZ: Asia/Shanghai
   ANDROID_VERSION: 'android12'
   KERNEL_VERSION: '5.10'
-  KERNEL_NAME: 'localhost-Hutao'
+  KERNEL_NAME: ''
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ on:
         description: '是否开启网络功能拓展配置(用于为ipset及需要iptables等高级网络功能内核支持的程序提供支持)'
         required: true
         type: boolean
-        default: false
+        default: true
       cve_2026_43499:
         description: '是否应用 CVE-2026-43499 rtmutex 修复链'
         required: true
@@ -43,12 +43,12 @@ on:
         description: '是否开启内建kernelsu(resukisu)'
         required: true
         type: boolean
-        default: true
+        default: false
       baseband_guard:
         description: '是否开启内核级基带保护(阻止一切对非用户分区的写入，有效防止格机)'
         required: true
         type: boolean
-        default: true
+        default: false
       unshare:
         description: '开启完整的unshare 支持'
         required: true
