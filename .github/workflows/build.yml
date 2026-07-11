@@ -476,4 +476,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: AnyKernel3
-          path: ${{ github.workspace }}/kernel_workspace/*.zip
+          path: ${{ github.workspace }}/kernel_workspace/AnyKernel3/*
