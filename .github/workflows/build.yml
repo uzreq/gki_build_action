@@ -91,7 +91,6 @@ jobs:
         run: |
           mkdir -p kernel_workspace
           cd kernel_workspace
-          
           # 安装配置环境依赖
           sudo apt-mark hold firefox &&
           sudo apt-mark hold libc-bin &&
@@ -101,7 +100,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             curl bison flex make binutils git perl gcc python3 \
             python-is-python3 bc libssl-dev libelf-dev \
-            bc aria2 zip unzip binutils-aarch64-linux-gnu &
+            bc aria2 zip unzip tar binutils-aarch64-linux-gnu &
           
           #使用最新版ccache-ECS（特化优化内核编译缓存，大幅提升二次不同配置编译速度）
           wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/lib/ccache-x86-64 -O ccache &&
@@ -110,16 +109,13 @@ jobs:
           rm -f ./ccache &
           
           echo "正在克隆源码仓库..." &&
-          aria2c -s16 -x16 -k1M https://github.com/ESK-Project/android12-5.10-gki/archive/refs/heads/main.zip -o common.zip && 
-          unzip -q common.zip && 
-          mv "android12-5.10-gki-main" common &&
-          rm -rf common.zip &
+          git clone https://github.com/ESK-Project/android12-5.10-gki.git -b main --recurse-submodules --depth=1 common &
           
-          echo "正在克隆llvm-Clang20工具链..." &&
-          mkdir -p clang20 &&
-          aria2c -s16 -x16 -k1M https://github.com/cctv18/oneplus_sm8650_toolchain/releases/download/LLVM-Clang20-r547379/clang-r547379.zip -o clang.zip &&
-          unzip -q clang.zip -d clang20 &&
-          rm -rf clang.zip &
+          echo "正在克隆llvm-Clang工具链..." &&
+          mkdir -p clang-r584948 &&
+          aria2c -s16 -x16 -k1M https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/mirror-goog-main-llvm-toolchain-source/clang-r584948.tar.gz -o clang-r584948.tar.gz &&
+          tar -xzvf clang-r584948.tar.gz -C clang-r584948 &&
+          rm -rf clang-r584948.tar.gz &
           
           echo "正在克隆构建工具..." &&
           aria2c -s16 -x16 -k1M https://github.com/cctv18/oneplus_sm8650_toolchain/releases/download/LLVM-Clang20-r547379/build-tools.zip -o build-tools.zip &&
@@ -127,7 +123,7 @@ jobs:
           rm -rf build-tools.zip &
           
           wait
-          echo "所有源码及llvm-Clang20工具链初始化完成！"
+          echo "所有源码及llvm-Clang工具链初始化完成！"
           echo "正在去除 ABI 保护 & 去除 dirty 后缀..."
           rm common/android/abi_gki_protected_exports_* || true
           for f in common/scripts/setlocalversion; do
@@ -153,7 +149,7 @@ jobs:
       - name: 配置ccache目录
         run: |
           echo "CCACHE_DIR=$HOME/.ccache_${{ env.KERNEL_VERSION }}" >> $GITHUB_ENV
-          echo "CCACHE_MAXSIZE=3G" >> $GITHUB_ENV
+          echo "CCACHE_MAXSIZE=15G" >> $GITHUB_ENV
           echo "当前磁盘空间："
           df -h
           echo "当前构建内核版本：${{ env.KERNEL_VERSION }}"
@@ -188,9 +184,11 @@ jobs:
           export CCACHE_NOHARDLINK="true"
           export CCACHE_DIR="${{ env.CCACHE_DIR }}"
           export CCACHE_MAXSIZE="${{ env.CCACHE_MAXSIZE }}"
-          
+          export CCACHE_LOGFILE='${{ github.workspace }}/kernel_workspace/ccache.log'
+          export CCACHE_IS_KERNEL_COMPILING="true"
+         
           mkdir -p "$CCACHE_DIR"
-          
+          echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$CCACHE_DIR/ccache.conf"  
           echo "配置ccache缓存大小为: $CCACHE_MAXSIZE"
           ccache -M "$CCACHE_MAXSIZE"
           ccache -o compression=true
@@ -394,26 +392,16 @@ jobs:
         run: |
           WORKDIR="$(pwd)"
           export PATH="/usr/lib/ccache:$PATH"
-          export PATH="$WORKDIR/kernel_workspace/clang20/bin:$PATH"
+          export PATH="$WORKDIR/kernel_workspace/clang-r584948/bin:$PATH"
           export PATH="$WORKDIR/kernel_workspace/build-tools/bin:$PATH"
-          CLANG_DIR="$WORKDIR/kernel_workspace/clang20/bin"
+          CLANG_DIR="$WORKDIR/kernel_workspace/clang-r584948/bin"
           CLANG_VERSION="$($CLANG_DIR/clang --version | head -n 1)"
           LLD_VERSION="$($CLANG_DIR/ld.lld --version | head -n 1)"
           echo "编译器信息:"
           echo "Clang版本: $CLANG_VERSION"
           echo "LLD版本: $LLD_VERSION"
           pahole_version=$(pahole --version 2>/dev/null | head -n1); [ -z "$pahole_version" ] && echo "pahole版本：未安装" || echo "pahole版本：$pahole_version"
-
-          export CCACHE_LOGFILE='${{ github.workspace }}/kernel_workspace/ccache.log'
-          export CCACHE_COMPILERCHECK="none"
-          export CCACHE_BASEDIR="${{ github.workspace }}"
-          export CCACHE_NOHASHDIR="true"
-          export CCACHE_NOHARDLINK="true"
-          export CCACHE_DIR="${{ env.CCACHE_DIR }}"
-          export CCACHE_MAXSIZE="3G"
-          export CCACHE_IS_KERNEL_COMPILING="true"
-          echo "sloppiness = file_stat_matches,include_file_ctime,include_file_mtime,pch_defines,file_macro,time_macros" >> "$CCACHE_DIR/ccache.conf"
-
+          
           cd kernel_workspace/common
           
           #在构建内核的同时清除不必要的.NET, Android NDK, Haskell, CodeQL运行库，清理空间且不阻塞后续步骤运行
